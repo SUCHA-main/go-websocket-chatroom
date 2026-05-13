@@ -1,0 +1,14 @@
+services:
+  go-websocket-chatroom:
+    build: .
+    ports:
+      - "8088:8088"
+    environment:
+      USERS_FILE: /data/users.json
+      OLLAMA_URL: http://host.docker.internal:11434
+      OLLAMA_MODEL: qwen2.5:3b
+    volumes:
+      - chatroom-users:/data
+
+volumes:
+  chatroom-users:

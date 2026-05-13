@@ -21,13 +21,14 @@ import (
 
 const (
 	addr               = ":8088"
-	usersFile          = "users.json"
 	sessionName        = "go_ws_session"
 	defaultOllamaURL   = "http://localhost:11434"
 	defaultOllamaModel = "qwen3.5:9b"
 	aiUnavailable      = "AI助手：本地 AI 暂时不可用，请确认 Ollama 是否已启动。"
 	maxMessageRunes    = 800
 )
+
+var usersFile = envOrDefault("USERS_FILE", "users.json")
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {

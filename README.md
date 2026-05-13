@@ -1,5 +1,7 @@
 # Go WebSocket Chatroom Demo
 
+[中文说明](README_CN.md)
+
 A small real-time chatroom demo built with Go, Gorilla WebSocket, and plain HTML/CSS/JavaScript. It includes local user registration, session-based login, message history, emoji/stickers, and optional local Ollama AI assistant commands.
 
 ## Features
@@ -30,6 +32,8 @@ A small real-time chatroom demo built with Go, Gorilla WebSocket, and plain HTML
 .
 ├── go.mod
 ├── go.sum
+├── Dockerfile
+├── docker-compose.yml
 ├── main.go
 ├── users.example.json
 ├── public/
@@ -65,6 +69,22 @@ http://localhost:8088
 
 The app creates `users.json` automatically on first run. That file stores local demo users and is intentionally ignored by Git.
 
+## Docker
+
+Build and run with Docker Compose:
+
+```powershell
+docker compose up --build
+```
+
+Open:
+
+```text
+http://localhost:8088
+```
+
+The Compose file stores demo users in a named volume and sets optional Ollama environment variables. Ollama is not required; AI commands will show a friendly unavailable message if the Ollama service is not running.
+
 ## Optional Ollama AI Assistant
 
 Start Ollama separately, then set the API URL and model if needed:
@@ -84,6 +104,15 @@ In the chatroom:
 ```
 
 If Ollama is not running, the chatroom remains available and returns a friendly AI unavailable message.
+
+## Security Notice
+
+This project is intended for learning and local demos. It is not a production-ready chat system.
+
+- `users.json` is a simple local JSON file, not a database.
+- Sessions are stored in memory and disappear when the process restarts.
+- The account system is intentionally minimal and lacks production features such as email verification, rate limiting, CSRF protection, audit logs, password reset, and persistent session storage.
+- Do not expose this demo directly to the public internet without additional security hardening.
 
 ## Testing
 
@@ -106,10 +135,10 @@ Manual checks:
 
 ## Screenshots
 
-Screenshots are not included yet. Suggested placeholders:
+Screenshots are not included yet. When adding images, place them under a future `screenshots/` directory and reference them from this section. Suggested screenshots:
 
 - Login page
-- Chatroom with two users online
+- Chatroom with two users
 - Emoji and sticker panel
 - AI assistant reply
 
@@ -117,7 +146,6 @@ Screenshots are not included yet. Suggested placeholders:
 
 - Add reconnect/backoff UI for WebSocket disconnects
 - Add message timestamps by date group
-- Add Dockerfile and compose example
 - Add automated browser tests
 - Add optional persistent database storage
 
