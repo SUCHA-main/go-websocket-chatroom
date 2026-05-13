@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go WebSocket Chatroom Demo</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main class="chat-shell">
+    <section class="panel chat-panel">
+        <div class="topbar">
+            <div>
+                <h1>Go WebSocket Chatroom Demo</h1>
+                <p>当前登录用户：<strong id="currentUser">加载中</strong></p>
+            </div>
+            <form id="logoutForm">
+                <button class="danger" type="submit">退出登录</button>
+            </form>
+        </div>
+
+        <div class="meta">
+            <div id="status" class="status">未连接</div>
+            <div id="onlineCount" class="online">在线人数：0</div>
+        </div>
+
+        <p class="ai-hint">输入 @AI 问题 或 /summary 可调用本地 AI</p>
+
+        <div id="messages" class="messages" aria-live="polite"></div>
+
+        <div class="sender">
+            <input id="messageInput" type="text" maxlength="800" placeholder="输入文字或 emoji，按 Enter 发送" autocomplete="off" disabled>
+            <button id="emojiBtn" type="button" disabled>😊</button>
+            <button id="sendBtn" type="button" disabled>发送</button>
+            <span id="charCount" class="char-count">0/800</span>
+        </div>
+
+        <div id="emojiPanel" class="emoji-panel" hidden>
+            <div class="emoji-list" aria-label="emoji 表情">
+                <button type="button">😀</button>
+                <button type="button">😂</button>
+                <button type="button">👍</button>
+                <button type="button">❤️</button>
+                <button type="button">😭</button>
+                <button type="button">😎</button>
+            </div>
+            <div id="stickerList" class="sticker-list" aria-label="本地表情包"></div>
+        </div>
+    </section>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>

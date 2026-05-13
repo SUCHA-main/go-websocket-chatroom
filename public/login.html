@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go WebSocket Chatroom Demo</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main class="auth-shell">
+    <section class="panel auth-panel">
+        <h1>Go WebSocket Chatroom Demo</h1>
+        <p class="hint">登录后进入聊天室</p>
+        <form id="loginForm" class="auth-form">
+            <input name="username" type="text" placeholder="用户名" autocomplete="username" required>
+            <input name="password" type="password" placeholder="密码" autocomplete="current-password" required>
+            <button type="submit">登录</button>
+        </form>
+        <p id="message" class="form-message"></p>
+        <p class="hint">没有账号？<a href="/register">去注册</a></p>
+    </section>
+</main>
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const message = document.getElementById('message');
+        const submitButton = form.querySelector('button[type="submit"]');
+        const body = {
+            username: form.username.value.trim(),
+            password: form.password.value,
+        };
+
+        if (!body.username || !body.password) {
+            message.textContent = '请填写用户名和密码';
+            return;
+        }
+
+        message.textContent = '正在登录...';
+        submitButton.disabled = true;
+
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+
+            if (response.ok) {
+                window.location.href = '/';
+                return;
+            }
+
+            const data = await response.json().catch(() => ({}));
+            message.textContent = data.error === 'invalid username or password' ? '用户名或密码不正确' : (data.error || '登录失败，请稍后再试');
+        } catch {
+            message.textContent = '网络异常，登录失败';
+        } finally {
+            submitButton.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>
