@@ -128,9 +128,35 @@ go run main.go
 │       ├── sticker-4.svg
 │       ├── sticker-5.svg
 │       └── sticker-6.svg
+├── docs/
+│   └── images/
+│       ├── login.png
+│       ├── chatroom.png
+│       ├── reconnect.png
+│       └── mobile.png
 ├── README.md
 └── README_CN.md
 ```
+
+## 项目截图
+
+### 登录页
+
+![登录页](docs/images/login.png)
+
+简洁的登录界面，支持用户名（3-20位，字母/数字/下划线/短横线）和密码（至少6位）输入校验。
+
+### 聊天室
+
+![聊天室](docs/images/chatroom.png)
+
+多用户实时聊天界面，展示在线人数、消息历史、emoji 支持和本地 SVG 表情包。
+
+### WebSocket 重连
+
+![WebSocket 重连](docs/images/reconnect.png)
+
+连接断开时自动重连（指数退避），显示连接状态指示器（已连接 / 已断开 / 重连中）。
 
 ## 安全说明
 
@@ -162,15 +188,6 @@ go test ./...
 - 停止 Ollama 后确认 AI 命令显示友好错误提示
 - 测试用户名校验：尝试过短、过长或特殊字符
 - 测试 WebSocket 断开：停止服务器观察重连行为
-
-## 截图说明
-
-目前还没有放真实截图。后续可以新增 `screenshots/` 目录，并补充这些图片：
-
-- 登录页
-- 两个用户在线的聊天室
-- emoji 和本地表情包面板
-- AI 助手回复效果
 
 ## 后续计划
 

@@ -52,9 +52,35 @@ A small real-time chatroom demo built with Go, Gorilla WebSocket, and plain HTML
 │       ├── sticker-4.svg
 │       ├── sticker-5.svg
 │       └── sticker-6.svg
+├── docs/
+│   └── images/
+│       ├── login.png
+│       ├── chatroom.png
+│       ├── reconnect.png
+│       └── mobile.png
 ├── README.md
 └── README_CN.md
 ```
+
+## Screenshots
+
+### Login Page
+
+![Login Page](docs/images/login.png)
+
+Clean login interface with input validation for username (3-20 characters, letters/digits/hyphens/underscores) and password (minimum 6 characters).
+
+### Chatroom
+
+![Chatroom](docs/images/chatroom.png)
+
+Real-time multi-user chat with online user count, message history, emoji support, and local SVG stickers.
+
+### WebSocket Reconnect
+
+![WebSocket Reconnect](docs/images/reconnect.png)
+
+Automatic reconnection with exponential backoff when connection is lost. Shows connection status indicator (connected / disconnected / reconnecting).
 
 ## Getting Started
 
@@ -161,15 +187,6 @@ Manual checks:
 - Stop Ollama and confirm AI commands show a friendly error
 - Test username validation: try too short, too long, or special characters
 - Test WebSocket disconnect: stop the server and observe reconnect behavior
-
-## Screenshots
-
-Screenshots are not included yet. When adding images, place them under a future `screenshots/` directory and reference them from this section. Suggested screenshots:
-
-- Login page
-- Chatroom with two users
-- Emoji and sticker panel
-- AI assistant reply
 
 ## Roadmap
 
