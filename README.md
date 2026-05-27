@@ -15,6 +15,9 @@ A small real-time chatroom demo built with Go, Gorilla WebSocket, and plain HTML
 - Text, emoji, and local SVG sticker messages
 - Distinct styles for self, other users, system messages, stickers, history, and AI messages
 - Message length limit and character counter
+- WebSocket connection status indicator (connected / disconnected / reconnecting)
+- Auto reconnect with exponential backoff on disconnect
+- Input validation for username and password on both frontend and backend
 - Optional local Ollama AI assistant with `@AI`, `/ai`, and `/summary`
 
 ## Tech Stack
@@ -49,12 +52,13 @@ A small real-time chatroom demo built with Go, Gorilla WebSocket, and plain HTML
 │       ├── sticker-4.svg
 │       ├── sticker-5.svg
 │       └── sticker-6.svg
-└── README.md
+├── README.md
+└── README_CN.md
 ```
 
 ## Getting Started
 
-Install Go, then run:
+Install Go 1.21+, then run:
 
 ```powershell
 go mod tidy
@@ -85,6 +89,18 @@ http://localhost:8088
 
 The Compose file stores demo users in a named volume and sets optional Ollama environment variables. Ollama is not required; AI commands will show a friendly unavailable message if the Ollama service is not running.
 
+To stop the containers:
+
+```powershell
+docker compose down
+```
+
+To rebuild after code changes:
+
+```powershell
+docker compose up --build
+```
+
 ## Optional Ollama AI Assistant
 
 Start Ollama separately, then set the API URL and model if needed:
@@ -104,6 +120,17 @@ In the chatroom:
 ```
 
 If Ollama is not running, the chatroom remains available and returns a friendly AI unavailable message.
+
+## Project Highlights
+
+- **Zero external frontend dependencies**: Pure HTML/CSS/JavaScript, no build tools required
+- **bcrypt password hashing**: Passwords are never stored in plaintext
+- **HttpOnly + SameSite cookies**: Session tokens are not accessible via JavaScript
+- **Message length limit**: 800 characters per message with real-time counter
+- **Sticker URL whitelist**: Only pre-approved sticker URLs are accepted
+- **Graceful AI fallback**: Chatroom works perfectly without Ollama running
+- **Docker ready**: One-command deployment with persistent user data volume
+- **WebSocket auto-reconnect**: Automatic recovery from network interruptions
 
 ## Security Notice
 
@@ -132,6 +159,8 @@ Manual checks:
 - Refresh the page and confirm recent history appears
 - Try `@AI` and `/summary` with Ollama running
 - Stop Ollama and confirm AI commands show a friendly error
+- Test username validation: try too short, too long, or special characters
+- Test WebSocket disconnect: stop the server and observe reconnect behavior
 
 ## Screenshots
 
@@ -144,10 +173,14 @@ Screenshots are not included yet. When adding images, place them under a future 
 
 ## Roadmap
 
-- Add reconnect/backoff UI for WebSocket disconnects
-- Add message timestamps by date group
-- Add automated browser tests
-- Add optional persistent database storage
+- [x] WebSocket auto-reconnect with exponential backoff
+- [x] Input validation for username and password
+- [x] Connection status indicator
+- [ ] Add message timestamps by date group
+- [ ] Add automated browser tests
+- [ ] Add optional persistent database storage
+- [ ] Add message search/filter
+- [ ] Add user profile customization
 
 ## License
 

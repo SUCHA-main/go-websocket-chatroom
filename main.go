@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -125,8 +126,8 @@ func (s *userStore) saveLocked() error {
 
 func (s *userStore) create(username, password string) error {
 	username = strings.TrimSpace(username)
-	if username == "" || password == "" {
-		return errors.New("username and password are required")
+	if err := validateCredentials(username, password); err != nil {
+		return err
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -344,6 +345,18 @@ func sanitizeType(messageType string) string {
 	default:
 		return "chat"
 	}
+}
+
+var validUsername = regexp.MustCompile(`^[a-zA-Z0-9_\-]{3,20}$`)
+
+func validateCredentials(username, password string) error {
+	if !validUsername.MatchString(username) {
+		return errors.New("username must be 3-20 characters, only letters, digits, hyphens, underscores")
+	}
+	if len(password) < 6 {
+		return errors.New("password must be at least 6 characters")
+	}
+	return nil
 }
 
 func parseAIPrompt(content string) (string, bool) {

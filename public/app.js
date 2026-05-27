@@ -14,13 +14,28 @@ const maxMessageLength = 800;
 const stickers = [1, 2, 3, 4, 5, 6].map((number) => `/stickers/sticker-${number}.svg`);
 let socket = null;
 let currentUser = '';
+let reconnectAttempts = 0;
+const maxReconnectAttempts = 5;
+const baseReconnectDelay = 1000;
+let reconnectTimer = null;
 
 function setConnected(connected) {
     statusEl.textContent = connected ? '已连接' : '未连接';
     statusEl.classList.toggle('connected', connected);
+    statusEl.classList.toggle('disconnected', !connected);
+    statusEl.classList.remove('reconnecting');
     messageInput.disabled = !connected;
     emojiBtn.disabled = !connected;
     sendBtn.disabled = !connected;
+}
+
+function setReconnecting() {
+    statusEl.textContent = '重连中...';
+    statusEl.classList.remove('connected');
+    statusEl.classList.add('disconnected', 'reconnecting');
+    messageInput.disabled = true;
+    emojiBtn.disabled = true;
+    sendBtn.disabled = true;
 }
 
 function setOnlineCount(count) {
@@ -46,6 +61,7 @@ function addMessage(data) {
     if (data.type === 'online') item.classList.add('online-message');
     if (data.type === 'history') item.classList.add('history-message');
     if (data.type === 'ai') item.classList.add('ai-message');
+    if (data.type === 'error') item.classList.add('error-message');
     if (data.username === currentUser) item.classList.add('own-message');
     if (data.username && data.username !== currentUser && !['系统', 'AI助手'].includes(data.username)) {
         item.classList.add('other-message');
@@ -75,9 +91,27 @@ function addMessage(data) {
 }
 
 function sendPayload(payload) {
-    if (!socket || socket.readyState !== WebSocket.OPEN) return false;
-    socket.send(JSON.stringify(payload));
-    return true;
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+        addMessage({
+            type: 'error',
+            username: '系统',
+            content: '消息发送失败：连接已断开，请等待重连或刷新页面',
+            time: new Date().toLocaleTimeString()
+        });
+        return false;
+    }
+    try {
+        socket.send(JSON.stringify(payload));
+        return true;
+    } catch (err) {
+        addMessage({
+            type: 'error',
+            username: '系统',
+            content: '消息发送失败：网络异常',
+            time: new Date().toLocaleTimeString()
+        });
+        return false;
+    }
 }
 
 function sendText() {
@@ -97,42 +131,86 @@ function sendSticker(stickerUrl) {
     messageInput.focus();
 }
 
+function getReconnectDelay() {
+    return Math.min(baseReconnectDelay * Math.pow(2, reconnectAttempts), 30000);
+}
+
 function connectWebSocket() {
+    if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+    }
+
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     socket = new WebSocket(`${protocol}//${window.location.host}/ws`);
 
     socket.onopen = () => {
+        reconnectAttempts = 0;
         setConnected(true);
+        addMessage({
+            type: 'system',
+            username: '系统',
+            content: 'WebSocket 连接已建立',
+            time: new Date().toLocaleTimeString()
+        });
     };
 
     socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        setOnlineCount(data.onlineCount);
-        if (data.type !== 'online') addMessage(data);
+        try {
+            const data = JSON.parse(event.data);
+            setOnlineCount(data.onlineCount);
+            if (data.type !== 'online') addMessage(data);
+        } catch (err) {
+            console.error('Failed to parse message:', err);
+        }
     };
 
-    socket.onclose = () => {
+    socket.onclose = (event) => {
         setConnected(false);
         setOnlineCount(0);
-        addMessage({ type: 'system', username: '系统', content: 'WebSocket 连接已关闭', time: new Date().toLocaleTimeString() });
+
+        if (reconnectAttempts < maxReconnectAttempts) {
+            setReconnecting();
+            const delay = getReconnectDelay();
+            reconnectAttempts++;
+            addMessage({
+                type: 'system',
+                username: '系统',
+                content: `连接已断开，${Math.round(delay / 1000)}秒后尝试第 ${reconnectAttempts}/${maxReconnectAttempts} 次重连...`,
+                time: new Date().toLocaleTimeString()
+            });
+            reconnectTimer = setTimeout(connectWebSocket, delay);
+        } else {
+            addMessage({
+                type: 'error',
+                username: '系统',
+                content: '重连失败，请刷新页面重试',
+                time: new Date().toLocaleTimeString()
+            });
+        }
     };
 
     socket.onerror = () => {
-        addMessage({ type: 'system', username: '系统', content: 'WebSocket 发生错误', time: new Date().toLocaleTimeString() });
+        console.error('WebSocket error');
     };
 }
 
 async function loadCurrentUser() {
-    const response = await fetch('/api/me');
-    if (!response.ok) {
-        window.location.href = '/login';
-        return;
-    }
+    try {
+        const response = await fetch('/api/me');
+        if (!response.ok) {
+            window.location.href = '/login';
+            return;
+        }
 
-    const data = await response.json();
-    currentUser = data.username;
-    currentUserEl.textContent = currentUser;
-    connectWebSocket();
+        const data = await response.json();
+        currentUser = data.username;
+        currentUserEl.textContent = currentUser;
+        connectWebSocket();
+    } catch (err) {
+        console.error('Failed to load user:', err);
+        window.location.href = '/login';
+    }
 }
 
 function renderStickers() {
@@ -180,6 +258,16 @@ messageInput.addEventListener('keydown', (event) => {
 
 logoutForm.addEventListener('submit', async (event) => {
     event.preventDefault();
+    reconnectAttempts = maxReconnectAttempts;
+    if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+    }
+    if (socket) {
+        socket.onclose = null;
+        socket.close();
+        socket = null;
+    }
     await fetch('/api/logout', { method: 'POST' });
     window.location.href = '/login';
 });

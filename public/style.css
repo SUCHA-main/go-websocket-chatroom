@@ -99,6 +99,22 @@ h1 {
     color: #166534;
 }
 
+.status.disconnected {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status.reconnecting {
+    background: #fef3c7;
+    color: #92400e;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
 .online {
     background: #e0f2fe;
     color: #075985;
@@ -196,6 +212,12 @@ button:disabled {
     background: #ede9fe;
     border: 1px solid #c4b5fd;
     color: #3b0764;
+}
+
+.error-message {
+    background: #fee2e2;
+    border: 1px solid #fca5a5;
+    color: #991b1b;
 }
 
 .sticker-image {

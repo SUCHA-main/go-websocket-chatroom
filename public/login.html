@@ -12,8 +12,8 @@
         <h1>Go WebSocket Chatroom Demo</h1>
         <p class="hint">登录后进入聊天室</p>
         <form id="loginForm" class="auth-form">
-            <input name="username" type="text" placeholder="用户名" autocomplete="username" required>
-            <input name="password" type="password" placeholder="密码" autocomplete="current-password" required>
+            <input name="username" type="text" placeholder="用户名（3-20位，字母数字下划线）" autocomplete="username" required minlength="3" maxlength="20" pattern="[a-zA-Z0-9_\-]+" title="只允许字母、数字、下划线、短横线">
+            <input name="password" type="password" placeholder="密码（至少6位）" autocomplete="current-password" required minlength="6">
             <button type="submit">登录</button>
         </form>
         <p id="message" class="form-message"></p>
@@ -26,13 +26,26 @@
         const form = event.currentTarget;
         const message = document.getElementById('message');
         const submitButton = form.querySelector('button[type="submit"]');
-        const body = {
-            username: form.username.value.trim(),
-            password: form.password.value,
-        };
+        const username = form.username.value.trim();
+        const password = form.password.value;
 
-        if (!body.username || !body.password) {
+        if (!username || !password) {
             message.textContent = '请填写用户名和密码';
+            return;
+        }
+
+        if (username.length < 3 || username.length > 20) {
+            message.textContent = '用户名长度应为 3-20 位';
+            return;
+        }
+
+        if (!/^[a-zA-Z0-9_\-]+$/.test(username)) {
+            message.textContent = '用户名只允许字母、数字、下划线、短横线';
+            return;
+        }
+
+        if (password.length < 6) {
+            message.textContent = '密码至少需要 6 位';
             return;
         }
 
@@ -43,7 +56,7 @@
             const response = await fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
+                body: JSON.stringify({ username, password }),
             });
 
             if (response.ok) {

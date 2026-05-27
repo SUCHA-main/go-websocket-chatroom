@@ -12,8 +12,8 @@
         <h1>Go WebSocket Chatroom Demo</h1>
         <p class="hint">创建账号后返回登录</p>
         <form id="registerForm" class="auth-form">
-            <input name="username" type="text" placeholder="用户名" autocomplete="username" required>
-            <input name="password" type="password" placeholder="密码" autocomplete="new-password" required>
+            <input name="username" type="text" placeholder="用户名（3-20位，字母数字下划线）" autocomplete="username" required minlength="3" maxlength="20" pattern="[a-zA-Z0-9_\-]+" title="只允许字母、数字、下划线、短横线">
+            <input name="password" type="password" placeholder="密码（至少6位）" autocomplete="new-password" required minlength="6">
             <button type="submit">注册</button>
         </form>
         <p id="message" class="form-message"></p>
@@ -26,13 +26,26 @@
         const form = event.currentTarget;
         const message = document.getElementById('message');
         const submitButton = form.querySelector('button[type="submit"]');
-        const body = {
-            username: form.username.value.trim(),
-            password: form.password.value,
-        };
+        const username = form.username.value.trim();
+        const password = form.password.value;
 
-        if (!body.username || !body.password) {
+        if (!username || !password) {
             message.textContent = '请填写用户名和密码';
+            return;
+        }
+
+        if (username.length < 3 || username.length > 20) {
+            message.textContent = '用户名长度应为 3-20 位';
+            return;
+        }
+
+        if (!/^[a-zA-Z0-9_\-]+$/.test(username)) {
+            message.textContent = '用户名只允许字母、数字、下划线、短横线';
+            return;
+        }
+
+        if (password.length < 6) {
+            message.textContent = '密码至少需要 6 位';
             return;
         }
 
@@ -43,7 +56,7 @@
             const response = await fetch('/api/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
+                body: JSON.stringify({ username, password }),
             });
 
             if (response.ok) {
@@ -53,7 +66,15 @@
             }
 
             const data = await response.json().catch(() => ({}));
-            message.textContent = data.error === 'user already exists' ? '该用户名已被注册' : (data.error || '注册失败，请稍后再试');
+            if (data.error === 'user already exists') {
+                message.textContent = '该用户名已被注册';
+            } else if (data.error === 'username must be 3-20 characters, only letters, digits, hyphens, underscores') {
+                message.textContent = '用户名需 3-20 位，只允许字母、数字、下划线、短横线';
+            } else if (data.error === 'password must be at least 6 characters') {
+                message.textContent = '密码至少需要 6 位';
+            } else {
+                message.textContent = data.error || '注册失败，请稍后再试';
+            }
         } catch {
             message.textContent = '网络异常，注册失败';
         } finally {
