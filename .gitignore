@@ -2,4 +2,10 @@ users.json
 *.log
 *.pid
 .env
+.env.*
+!.env.example
 tmp/
+dist/
+build/
+.DS_Store
+Thumbs.db
