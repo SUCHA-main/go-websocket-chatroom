@@ -84,11 +84,11 @@ Automatic reconnection with exponential backoff when connection is lost. Shows c
 
 ## Getting Started
 
-Install Go 1.21+, then run:
+Install Go 1.25+, then run:
 
 ```powershell
-go mod tidy
-go run main.go
+go mod download
+go run .
 ```
 
 Open:
@@ -169,13 +169,22 @@ This project is intended for learning and local demos. It is not a production-re
 
 ## Testing
 
-Run:
+Run these read-only checks:
 
 ```powershell
-gofmt -w main.go
-go mod tidy
+gofmt -d .
+go mod tidy -diff
 go test ./...
+go vet ./...
 ```
+
+Verify the build separately:
+
+```powershell
+go build ./...
+```
+
+`go build ./...` writes a `go-websocket-chatroom` executable (or `go-websocket-chatroom.exe` on Windows) in the project root. The generated binary is ignored by Git and can be removed after verification. `gofmt -w .` and `go mod tidy` also update files; run them only when you intend to apply changes, then review the diff.
 
 Manual checks:
 

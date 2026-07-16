@@ -31,11 +31,11 @@
 
 ## 快速启动
 
-确保已经安装 Go 1.21+，然后执行：
+确保已经安装 Go 1.25+，然后执行：
 
 ```powershell
-go mod tidy
-go run main.go
+go mod download
+go run .
 ```
 
 浏览器访问：
@@ -170,13 +170,22 @@ go run main.go
 
 ## 测试
 
-运行：
+运行以下只读检查：
 
 ```powershell
-gofmt -w main.go
-go mod tidy
+gofmt -d .
+go mod tidy -diff
 go test ./...
+go vet ./...
 ```
+
+再单独验证构建：
+
+```powershell
+go build ./...
+```
+
+`go build ./...` 会在项目根目录生成 `go-websocket-chatroom` 可执行文件（Windows 下为 `go-websocket-chatroom.exe`）。该产物已被 Git 忽略，验证后可以删除。`gofmt -w .` 和 `go mod tidy` 也会修改文件；只有在确实需要应用变更时才运行，并在运行后检查差异。
 
 手动检查：
 
@@ -199,3 +208,7 @@ go test ./...
 - [ ] 可选数据库存储
 - [ ] 消息搜索/过滤
 - [ ] 用户资料自定义
+
+## 许可证
+
+本项目采用 MIT License，详见 [LICENSE](LICENSE)。

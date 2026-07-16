@@ -7,5 +7,7 @@ users.json
 tmp/
 dist/
 build/
+/go-websocket-chatroom
+/go-websocket-chatroom.exe
 .DS_Store
 Thumbs.db
